@@ -1,12 +1,12 @@
 # Backblaze Exclusion Manager
-A small windows program to fine tune exclusion list for backblaze personal backup. 
-Exclude files or folders from being backed up and eating up your previous bandwidth.
+A small Python program to fine tune exclusion list for Backblaze personal backup. 
+Exclude files or folders from being backed up and eating up your precious bandwidth.
 
 ![image](https://github.com/user-attachments/assets/d3cec3e3-be51-4862-93a7-1726df7b571b)
 
 ## How to use
 1. Use the buttons to select file or a folder.
-2. To remove something from the exclusion list, select it from the list and click the "Remove Selected" button. This will promp a dialog box asking you confirm your action. This is undoable.
+2. To remove something from the exclusion list, select it from the list and click the "Remove Selected" button. This will prompt a dialog box asking you confirm your action. This is undoable.
 3. You can backup the xml file that these entries is being written into. The backup will copy the same file and save it with extension .xml_DDMMYYhhmmss where the suffix is the date and time.
 4. Always a good idea to remove all extensions from the default exclusion list like this in backblaze control panel. ![image](https://github.com/user-attachments/assets/b4bfd9fd-c96c-4e09-8f51-a9c8a86b6eb1)
 
@@ -34,4 +34,3 @@ Backblaze does allow you to manually edit exclusion list using an xml file (Arti
 2. Not affliated with Backblaze or Backblaze, Inc.
 3. Run as administrator to avoid problems. (Optional)
 4. Always a good idea to create backups of the default xml list before making any edits.
-5. Created for Windows and tested on Windows. I do not recommend using the python script to run this program on a mac, unless specifically modified to be used on mac.
