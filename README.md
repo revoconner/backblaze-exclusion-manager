@@ -31,5 +31,7 @@ Backblaze does allow you to manually edit exclusion list using an xml file (Arti
 
 ## Disclaimers
 1. Backblaze logo is a trademark of the Backblaze, Inc.
-2. Run as administrator to avoid problems.
-3. Always a good idea to create backups of the default xml list before making any edits.
+2. Not affliated with Backblaze or Backblaze, Inc.
+3. Run as administrator to avoid problems. (Optional)
+4. Always a good idea to create backups of the default xml list before making any edits.
+5. Created for Windows and tested on Windows. I do not recommend using the python script to run this program on a mac, unless specifically modified to be used on mac.
