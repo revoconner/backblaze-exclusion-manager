@@ -6,6 +6,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 
+
 class ExclusionManagerGUI:
     def __init__(self):
         self.root = ctk.CTk()
@@ -38,20 +39,20 @@ class ExclusionManagerGUI:
 
         # Create buttons
         ctk.CTkButton(self.button_frame,
-                     text="Select File",
-                     command=self.select_file).pack(side="left", padx=5, pady=5, expand=True)
+                      text="Select File",
+                      command=self.select_file).pack(side="left", padx=5, pady=5, expand=True)
 
         ctk.CTkButton(self.button_frame,
-                     text="Select Folder",
-                     command=self.select_folder).pack(side="left", padx=5, pady=5, expand=True)
+                      text="Select Folder",
+                      command=self.select_folder).pack(side="left", padx=5, pady=5, expand=True)
 
         ctk.CTkButton(self.button_frame,
-                     text="Remove Selected",
-                     command=self.remove_selected).pack(side="left", padx=5, pady=5, expand=True)
+                      text="Remove Selected",
+                      command=self.remove_selected).pack(side="left", padx=5, pady=5, expand=True)
 
         ctk.CTkButton(self.button_frame,
-                     text="Backup This List",
-                     command=self.create_backup).pack(side="left", padx=5, pady=5, expand=True)
+                      text="Backup This List",
+                      command=self.create_backup).pack(side="left", padx=5, pady=5, expand=True)
 
         # Create scrollable frame for list
         self.list_frame = ctk.CTkScrollableFrame(self.main_frame)
@@ -64,7 +65,7 @@ class ExclusionManagerGUI:
         # Load existing entries
         self.refresh_listbox()
 
-    def handle_label_click(self, label, text):
+    def handle_label_click(self, label):
         if self.selected_label:
             self.selected_label.configure(fg_color="transparent")
         label.configure(fg_color="green")
@@ -128,26 +129,11 @@ class ExclusionManagerGUI:
                     cursor="hand2"
                 )
                 label.pack(fill="x", padx=5, pady=2)
-                label.bind("<Button-1>", lambda e, l=label, t=entry: self.handle_label_click(l, t))
+                label.bind("<Button-1>", lambda event, widget=label: self.handle_label_click(widget))
                 self.labels.append(label)
 
         except Exception as e:
             messagebox.showerror("Error", f"Error loading existing entries: {str(e)}")
-
-    def handle_click(self, event):
-        # Get clicked position
-        index = self.listbox.index(f"@{event.x},{event.y}")
-        line = int(index.split('.')[0])
-
-        # Clear previous selection
-        self.listbox.configure(state="normal")
-        self.listbox.tag_remove("selected", "1.0", "end")
-
-        # Add new selection
-        self.listbox.tag_add("selected", f"{line}.0", f"{line + 1}.0")
-        self.selected_line = line
-
-        self.listbox.configure(state="disabled")
 
     def get_selected_text(self):
         if not self.selected_label:
@@ -157,26 +143,6 @@ class ExclusionManagerGUI:
         text = self.selected_label.cget("text")
         # Remove the number prefix
         return '.'.join(text.split('.')[1:]).strip()
-
-    def get_selected_line(self):
-        if self.selected_line is None:
-            messagebox.showinfo("Info", "Please select an item first")
-            return None
-
-        try:
-            # Get the text of the selected line
-            self.listbox.configure(state="normal")
-            line_start = f"{self.selected_line}.0"
-            line_end = f"{self.selected_line}.end"
-            selected_text = self.listbox.get(line_start, line_end).strip()
-            self.listbox.configure(state="disabled")
-
-            # Remove the line number prefix
-            if selected_text:
-                selected_text = '.'.join(selected_text.split('.')[1:]).strip()
-            return selected_text
-        except:
-            return None
 
     def create_exclusion_rule(self, path, is_file=False):
         base_rule = {
@@ -303,7 +269,6 @@ class ExclusionManagerGUI:
         except Exception as e:
             messagebox.showerror("Error", f"Error removing entry: {str(e)}")
 
-
     def create_backup(self):
         try:
             # Generate timestamp in ddmmyyhhmmss format
@@ -318,6 +283,7 @@ class ExclusionManagerGUI:
 
     def run(self):
         self.root.mainloop()
+
 
 if __name__ == "__main__":
     app = ExclusionManagerGUI()
