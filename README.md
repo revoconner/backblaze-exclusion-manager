@@ -15,10 +15,9 @@ Exclude files or folders from being backed up and eating up your precious bandwi
  The list entries have several nuances
  1. Starts with: if an entry has this, then it's not tied to any drive letter.
  2. Path: Path to a folder or a file. If a drive letter is not included in this, then it's not tied to any drive letter.
- 3. Ends with: same as path but just contains the final part of a path. So for example
- 4. This will affect all folders in any drive letter that starts with /users/ and ends with /cookies/index.dat as long as its a file with a .dat extenstion so it will affect: DD/users/randomassname/cookies/index.dat as long as index.dat is a file and not a folder.![image](https://github.com/user-attachments/assets/2cf79d3b-5752-4559-b4d9-3ea3c740b1b2)
- 5. When user adds a folder it appears like this, with the drive letter. Pretty self explanatory.![image](https://github.com/user-attachments/assets/1fb7e7c1-be06-4f92-af6d-5339e0836fce)
- 6. When user adds a file it appears like this, with the drive letter but also with "ends with" as the file name, and extension of the file. ![image](https://github.com/user-attachments/assets/acfe46d0-89b4-4663-ad3c-36c69a238561)
+ 3. Ends with: same as path but just contains the final part of a path. So for example this will affect all folders in any drive letter that starts with /users/ and ends with /cookies/index.dat as long as its a file with a .dat extenstion so it will affect: DD/users/randomassname/cookies/index.dat as long as index.dat is a file and not a folder.![image](https://github.com/user-attachments/assets/2cf79d3b-5752-4559-b4d9-3ea3c740b1b2)
+ 4. When user adds a folder it appears like this, with the drive letter. Pretty self explanatory.![image](https://github.com/user-attachments/assets/1fb7e7c1-be06-4f92-af6d-5339e0836fce)
+ 5. When user adds a file it appears like this, with the drive letter but also with "ends with" as the file name, and extension of the file. ![image](https://github.com/user-attachments/assets/acfe46d0-89b4-4663-ad3c-36c69a238561)
 
 
 
@@ -34,3 +33,7 @@ Backblaze does allow you to manually edit exclusion list using an xml file (Arti
 2. Not affliated with Backblaze or Backblaze, Inc.
 3. Run as administrator to avoid problems. (Optional)
 4. Always a good idea to create backups of the default xml list before making any edits.
+
+## Changelog
+V 1.0 Initial Commit
+V 1.1 Added Mac support, code cleanup (thanks metadaddy for the merge request)
