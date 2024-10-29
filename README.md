@@ -33,6 +33,8 @@ Backblaze does allow you to manually edit exclusion list using an xml file (Arti
 2. Not affliated with Backblaze or Backblaze, Inc.
 3. Run as administrator to avoid problems. (Optional)
 4. Always a good idea to create backups of the default xml list before making any edits.
+5. Since I do not have a mac system, no compiled version for mac is supported. Please use the python script to compile an app if you want.
+6. For windows and Mac only. (Windows have an exe)
 
 ## Changelog
 V 1.0 Initial Commit
