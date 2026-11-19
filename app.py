@@ -21,12 +21,13 @@ from selection import EXCLUDED, INCLUDED, PARTIAL, Selection
 
 TITLE = "Backblaze Exclusion Manager"
 TEXT, DIM, LOCKED, NOTE = QColor("#f2f2f2"), QColor("#909090"), QColor("#636363"), QColor("#7d7d7d")
-GUIDE, ROW_SELECTED = QColor("#e6e6e6"), QColor("#3b3b3b")
+GUIDE, ROW_SELECTED = QColor("#585858"), QColor("#3b3b3b")
 ROW_HEIGHT, CHECK_WIDTH, BOX = 32, 46, 18
+BUTTON_GAP = 18
 ASK_ABOVE = 10
 STYLE = """
 #root { background: #060606; }
-#panel { background: #2e2e2e; border: 2px solid #f2f2f2; border-radius: 22px; }
+#panel { background: #2e2e2e; border: 1px solid #5e5e5e; border-radius: 22px; }
 QTreeView { background: transparent; border: none; outline: 0; }
 QPushButton { border: none; border-radius: 10px; padding: 7px 20px; min-width: 96px; font-size: 13pt; }
 QPushButton#backup { background: #8f8f8f; color: #1c1c1c; }
@@ -247,11 +248,12 @@ class Tree(QTreeView):
         painter.save()
         if self.selectionModel().isRowSelected(first.row(), first.parent()):
             painter.fillRect(rect, ROW_SELECTED)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QPen(GUIDE, 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.FlatCap))
+        # one thin guide line per level above this row, drawn on the pixel grid so it stays sharp
+        painter.setPen(QPen(GUIDE, 1))
         for level in range(depth):
-            x = rect.left() + level * step + step / 2
-            painter.drawLine(QPointF(x, rect.top()), QPointF(x, rect.bottom() + 1))
+            x = rect.left() + level * step + step // 2
+            painter.drawLine(x, rect.top(), x, rect.bottom())
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         if self.model().hasChildren(first):
             cx, cy = rect.left() + depth * step + step / 2, rect.center().y() + 0.5
             points = [(-5, -2.5), (0, 2.5), (5, -2.5)] if self.isExpanded(first) else [(-2.5, -5), (2.5, 0), (-2.5, 5)]
@@ -323,33 +325,37 @@ class Window(QWidget):
 
         panel = QFrame()
         panel.setObjectName("panel")
-        inside = QVBoxLayout(panel)
-        inside.setContentsMargins(12, 20, 8, 20)
-        inside.addWidget(self.tree)
-
+        # the status line lives inside the panel, so the strip below it holds nothing but the buttons
         self.status = QLabel()
         self.status.setObjectName("status")
         self.status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
         self.status.setFixedHeight(20)
+        inside = QVBoxLayout(panel)
+        inside.setContentsMargins(12, 20, 8, 8)
+        inside.setSpacing(4)
+        inside.addWidget(self.tree)
+        inside.addWidget(self.status)
+
         self.backup_button, self.cancel_button, self.confirm_button = QPushButton("backup"), QPushButton("cancel"), QPushButton("confirm")
         for button, name, slot in ((self.backup_button, "backup", self.backup), (self.cancel_button, "cancel", self.cancel), (self.confirm_button, "confirm", self.confirm)):
             button.setObjectName(name)
             button.setCursor(Qt.CursorShape.PointingHandCursor)
             button.clicked.connect(slot)
         bar = QHBoxLayout()
-        bar.setContentsMargins(40, 0, 20, 0)
+        # no side margins: backup lines up with the panel's left edge, confirm with its right edge
+        bar.setContentsMargins(0, 0, 0, 0)
         bar.setSpacing(18)
         bar.addWidget(self.backup_button)
         bar.addStretch(1)
         bar.addWidget(self.cancel_button)
         bar.addWidget(self.confirm_button)
 
+        # same gap above and below the buttons, which centres them between the panel and the window edge
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(18, 16, 18, 18)
-        outer.setSpacing(10)
+        outer.setContentsMargins(18, 16, 18, BUTTON_GAP)
+        outer.setSpacing(BUTTON_GAP)
         outer.addWidget(panel, 1)
-        outer.addWidget(self.status)
         outer.addLayout(bar)
         self.refresh()
 
@@ -505,7 +511,7 @@ class Window(QWidget):
             QMessageBox.critical(self, TITLE, f"The rules file could not be written.\n\n{error}\n\nIf this is a permission problem, start the app as administrator.")
             return
         self.load()
-        self.refresh("Saved. In Backblaze, hold Ctrl and click Restore Options to rescan now.")
+        self.refresh("Saved. To rescan now: pause the backup in Backblaze, then hold Ctrl and click Restore Options.")
 
     def write(self, new_text):
         """One backup per session before the first write, then the file is overwritten in place so it keeps the access list Backblaze gave it."""
