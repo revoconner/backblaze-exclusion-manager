@@ -12,14 +12,20 @@ from pathlib import Path
 from rules import Matcher, apply_edits, file_rule_text, folder_rule_text, parse, set_attr
 
 
+LINK_TAGS = (0xA0000003, 0xA000000C)
+
+
 def list_folder(path):
     """(name, is_dir, is_link) for each entry, or None when the folder cannot be read."""
     try:
         with os.scandir(path + "\\") as it:
             out = []
             for entry in it:
-                flags = entry.stat(follow_symlinks=False).st_file_attributes
-                out.append((entry.name, bool(flags & stat.FILE_ATTRIBUTE_DIRECTORY), bool(flags & stat.FILE_ATTRIBUTE_REPARSE_POINT)))
+                info = entry.stat(follow_symlinks=False)
+                flags = info.st_file_attributes
+                # only junctions and symbolic links count as links, a cloud folder such as OneDrive carries another tag
+                link = bool(flags & stat.FILE_ATTRIBUTE_REPARSE_POINT) and info.st_reparse_tag in LINK_TAGS
+                out.append((entry.name, bool(flags & stat.FILE_ATTRIBUTE_DIRECTORY), link))
             return out
     except OSError:
         return None

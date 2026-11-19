@@ -14,6 +14,7 @@ UNQUOTES = {"&quot;": '"', "&apos;": "'"}
 _TOKEN = re.compile(r"<!--.*?-->|<excludefname_rule\b[^>]*>", re.S)
 _ATTR = re.compile(r'([\w.-]+)\s*=\s*"([^"]*)"')
 _ANCHOR = re.compile(r"^[A-Za-z]:\\.")
+_ROOT = re.compile(r"^[A-Za-z]:\\$")
 
 
 @dataclass
@@ -59,12 +60,17 @@ def classify(rule):
     if a["plat"] != "win" or a["osVers"] != "*" or "bzmergeblock" in a:
         return
     sw, c1, c2, dnc, ew, ext = (a[name] for name in CRITERIA)
-    if anchored(c1) and c2 == "*" and ew == "*" and ext == "*" and _prefix_fits(sw, c1.rstrip("\\")):
+    # a drive root counts as a folder too, its target is written as "C:"
+    if (anchored(c1) or _ROOT.match(c1)) and c2 == "*" and ew == "*" and ext == "*" and _prefix_fits(sw, c1.rstrip("\\")):
         if dnc == "*":
             rule.kind = "folder" if c1.endswith("\\") else "legacy_folder"
             rule.target = c1.rstrip("\\")
-        elif c1.endswith("\\") and all(part.lower().startswith(c1.lower()) for part in dnc.split("|")):
-            rule.kind, rule.target = "keeplist", c1.rstrip("\\")
+        elif c1.endswith("\\"):
+            # a keep list this app can manage names only things directly inside the folder
+            parts = dnc.split("|")
+            names = [part[len(c1):] for part in parts if part.lower().startswith(c1.lower())]
+            if len(names) == len(parts) and all(name and "\\" not in name for name in names):
+                rule.kind, rule.target, rule.extra = "keeplist", c1.rstrip("\\"), {"names": names}
     elif anchored(ew) and c1 == "*" and c2 == "*" and dnc == "*" and _prefix_fits(sw, ew):
         rule.kind, rule.target = "file", ew
     elif anchored(c1) and c2 == "*" and dnc == "*" and "\\" not in ew and c1.lower().endswith("\\" + ew.lower()):
@@ -176,6 +182,8 @@ class Matcher:
 def prefix_for(path, is_dir):
     """skipFirstCharThenStartsWith for an item: its parent folder, or the item itself when it sits in a drive root."""
     rest = path[2:]
+    if not rest:
+        return "*"
     parent = rest[:rest.rfind("\\") + 1]
     if parent != "\\":
         return ":" + parent
@@ -199,6 +207,17 @@ def file_rule_text(path):
     dot = name.rfind(".")
     ext = name[dot + 1:] if dot > 0 else ""
     return format_rule(prefix_for(path, False), ends_with=path, ext=ext if ext.isascii() and ext.isalnum() else "*")
+
+
+def keeplist_rule_text(folder, names):
+    """Everything in the folder is left out except the named items directly inside it.
+
+    Folder entries are written without a trailing backslash on purpose. With one, Backblaze cuts the kept folder off before looking inside.
+    """
+    folder = folder.rstrip("\\")
+    prefix = ":" + folder[2:] + "\\" if len(folder) > 2 else "*"
+    keep = "|".join(folder + "\\" + name for name in sorted(names, key=str.lower))
+    return format_rule(prefix, contains_1=folder + "\\", does_not_contain=keep)
 
 
 def set_attr(raw, name, value):
