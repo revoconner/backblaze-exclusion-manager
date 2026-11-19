@@ -85,6 +85,7 @@ class Matcher:
     """Answers whether Backblaze would leave a path out, for one set of rules.
 
     A folder is tested as its path without a trailing backslash, and when a rule matches it nothing below is looked at.
+    That only happens from the third level below a drive root. The first two levels are top folders that Backblaze always walks, testing their files one by one.
     A file is left out when a folder above it was cut off or when a rule matches the file path itself.
     """
 
@@ -99,7 +100,8 @@ class Matcher:
                 continue
             parts = () if dnc == "*" else tuple(p for p in dnc.split("|") if p)
             self._entries.append((sw, c1, c2, parts, ew, ext, rule))
-        self._whole = [e for e in self._entries if not e[3] and e[4] == "*" and e[5] == "*"]
+        # rules that can take out a whole folder: no file name criteria, and any keep entries are full paths
+        self._whole = [e for e in self._entries if e[4] == "*" and e[5] == "*" and all(_ANCHOR.match(part) for part in e[3])]
         self._by_parent = {}
         self._cut = {}
 
@@ -150,7 +152,8 @@ class Matcher:
         if len(low) <= 2:
             return None
         if low not in self._cut:
-            self._cut[low] = self.cut_off(low[:low.rfind("\\")]) or self.match(low)
+            own = self.match(low) if low.count("\\") > 2 else None
+            self._cut[low] = self.cut_off(low[:low.rfind("\\")]) or own
         return self._cut[low]
 
     def file_rule(self, path):
@@ -165,7 +168,7 @@ class Matcher:
             return hit
         low = path.lower() + "\\"
         for entry in self._whole:
-            if self._test(entry, low):
+            if self._test(entry, low) and not any(part.startswith(low) for part in entry[3]):
                 return entry[6]
         return None
 

@@ -105,9 +105,11 @@ def compare_folders(old_text, new_text, parents, listdir=list_folder):
 
 
 def compare_filelists(old_text, new_text, folder, skip_under=()):
-    """Runs every path Backblaze listed for backup through both rule texts. Returns (paths checked, paths the old rules
-    would drop, paths the new rules would drop). Both lists should be empty: the first checks this matcher against
-    Backblaze itself, the second checks that nothing currently backed up gets lost."""
+    """Runs every path Backblaze listed for backup through both rule texts.
+
+    Returns (paths checked, paths the old rules would drop, paths the new rules would drop).
+    Both lists should be empty: the first checks this matcher against Backblaze itself, the second checks that nothing currently backed up gets lost.
+    """
     old, new = Matcher(parse(old_text)), Matcher(parse(new_text))
     checked, old_drops, new_drops = 0, [], []
     for listing in sorted(Path(folder).glob("*____filelist.dat")):
